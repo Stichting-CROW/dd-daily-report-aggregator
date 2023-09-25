@@ -1,0 +1,22 @@
+apiVersion: batch/v1beta1 
+kind: CronJob
+metadata:
+  name: deelfietsdashboard-daily-report
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: deelfietsdashboard-daily-report
+            image: registry.gitlab.com/bikedashboard/daily-report:0.1.5
+            env:  
+            - name: ip
+              value: "10.133.75.95"
+            - name: password
+              valueFrom:
+                secretKeyRef:
+                  name: db-password-deelfietsdashboard
+                  key: password
+          restartPolicy: OnFailure

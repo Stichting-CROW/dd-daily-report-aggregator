@@ -1,0 +1,20 @@
+SELECT zone_ref, stat_description, system_id, avg(value) as avg, count(value)
+FROM stats_pre_process
+WHERE date
+IN (
+    SELECT generate_series(
+           (date '2020-12-1')::timestamp,
+           (date '2020-12-10')::timestamp,
+           interval '1 days'
+    )::date
+) 
+AND zone_ref in (select stats_ref from zones where municipality = 'GM0599')
+GROUP BY zone_ref, stat_description, system_id
+ORDER BY avg;
+
+
+SELECT name, stats_ref, zone_type 
+FROM zones 
+WHERE municipality = 'GM0599' 
+AND zone_type in ('municipality', 'residential_area') 
+ORDER BY zone_type, name;

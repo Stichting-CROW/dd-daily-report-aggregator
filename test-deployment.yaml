@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: preprocess-country-stats
+spec:
+  template:
+    spec:
+      containers:
+      - env:
+        - name: ip
+          value: 10.133.75.95
+        - name: password
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: db-password-deelfietsdashboard
+        image: registry.gitlab.com/bikedashboard/daily-report:0.2-test
+        imagePullPolicy: IfNotPresent
+        name: deelfietsdashboard-daily-report
+      restartPolicy: Never

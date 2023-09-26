@@ -14,8 +14,7 @@ class ParkEventStats():
                 ( now()::date - %s, now()::date, '1 day'::interval) dd) as q1
             WHERE q1.date NOT IN (SELECT date 
                 FROM stats_pre_process
-                WHERE stat_description = 'number_of_vehicles_available'
-                AND zone_ref = 'country:NL');
+                WHERE stat_description = 'number_of_vehicles_available');
         """
         cur = conn.cursor()
         cur.execute(stmt, (number_dates_in_the_past,))
@@ -57,10 +56,10 @@ class ParkEventStats():
         cur = conn.cursor()
         date.replace(hour=3, minute=0, second=0)
         stmt = """SELECT (%s - start_time) as park_duration_at_this_moment,
-            (SELECT array_agg(stats_ref) from zones where st_intersects(location, area) and (zone_type = 'country')), system_id
+            (SELECT array_agg(stats_ref) from zones where st_intersects(location, area) and stats_ref IS NOT NULL), system_id
             FROM park_events
             WHERE start_time <= %s
-            AND (end_time > %s OR end_time is null)"""
+            AND (end_time > %s OR end_time IS NULL)"""
         cur.execute(stmt, (date, date, date, ))
         return cur.fetchall()
 

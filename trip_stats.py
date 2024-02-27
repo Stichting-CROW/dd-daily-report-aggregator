@@ -14,8 +14,7 @@ class NumberOfTripsStats():
                 ( now()::date - %s, now()::date - 1, '1 day'::interval) dd) as q1
             WHERE q1.date NOT IN (SELECT date 
                 FROM stats_pre_process
-                WHERE stat_description = 'number_of_trip_started'
-                AND zone_ref = 'country:NL');
+                WHERE stat_description = 'number_of_trip_started');
         """
         cur = conn.cursor()
         cur.execute(stmt, (number_of_dates_in_the_past,))
@@ -32,9 +31,9 @@ class NumberOfTripsStats():
     def get_trips_made_on_date(self, conn, date):
         cur = conn.cursor()
         stmt = """SELECT trip_id,
-            (SELECT array_agg(stats_ref) from zones where st_intersects(start_location, area) and (zone_type = 'country')), system_id
+            (SELECT array_agg(stats_ref) from zones where st_intersects(start_location, area) AND stats_ref IS NOT null), system_id
             FROM trips
-            WHERE start_time >= %s and start_time <= %s + 1;  """
+            WHERE start_time >= %s and start_time <= %s + '1 day'::interval;  """
         cur.execute(stmt, (date, date, ))
         return cur.fetchall()
 
@@ -70,8 +69,7 @@ class TripDurationStats():
                 ( now()::date - %s, now()::date - 1, '1 day'::interval) dd) as q1
             WHERE q1.date NOT IN (SELECT date 
                 FROM stats_pre_process
-                WHERE stat_description = 'number_of_trips_ended'
-                AND zone_ref = 'country:NL');
+                WHERE stat_description = 'number_of_trips_ended');
         """
         cur = conn.cursor()
         cur.execute(stmt, (number_of_dates_in_the_past,))
@@ -111,9 +109,9 @@ class TripDurationStats():
     def get_trips_ended_on_date(self, conn, date):
         cur = conn.cursor()
         stmt = """SELECT (end_time - start_time) as trip_duration,
-            (SELECT array_agg(stats_ref) from zones where st_intersects(start_location, area) and (zone_type = 'country')), system_id
+            (SELECT array_agg(stats_ref) from zones where st_intersects(start_location, area) and stats_ref IS NOT NULL), system_id
             FROM trips
-            WHERE end_time >= %s and end_time <= %s + 1;  """
+            WHERE end_time >= %s and end_time <= %s + '1 day'::interval;  """
         cur.execute(stmt, (date, date,))
         return cur.fetchall()
 
